@@ -1,0 +1,157 @@
+# phionyx-eval
+
+> LLM-as-judge primitive (eval-side) for Phionyx runtime-evidence chains. Score a (claim, evidence) pair under a rubric; produce a signed Judgment envelope; verify the chain end-to-end. The caller supplies the LLM client — there is no hard dependency on any provider SDK.
+
+## Status
+
+**v0.1.0a1 — alpha.** Phionyx v0.6.0 W2 deliverable. Ships in the Viryel monorepo at `tools/phionyx_eval/`; promoted to the public `halvrenofviryel/phionyx-eval` repo at v0.6.0 release.
+
+## What this package is
+
+A small eval-side toolkit:
+
+- **`LLMClient`** — Protocol surface (`complete(prompt: str) -> str`). Plug in Anthropic SDK, OpenAI SDK, LiteLLM, an HTTP wrapper, or a mock.
+- **`Rubric`** — Pydantic model for a scoring rubric: criteria, integer scale, normalised pass threshold. Four canonical Phionyx rubrics ship by default.
+- **`LLMAsJudge`** — judges one (claim, evidence) pair under a rubric. Produces a `Judgment` with per-criterion scores, an aggregate normalised score, a deterministic verdict (pass / fail / uncertain), and the model's overall rationale.
+- **`build_judgment_envelope`** — wraps a `Judgment` in a signed, hash-chained envelope. Mirrors the audit-chain pattern used by `phionyx-langchain-langgraph` and `phionyx-mcp-server`.
+
+## What this package is NOT
+
+- **NOT a runtime cognitive component.** LLM-as-judge is a measurement tool. It does not enter the Phionyx mind-loop, does not update memory, does not affect determinism in `phionyx-core`. Per the AGI invariants, this is infrastructure, not cognitive progress.
+- **NOT a benchmark runner.** It scores one (claim, evidence) pair at a time. Batch evaluation, score aggregation across many calls, and dashboarding are out of scope for v0.1.
+- **NOT a compliance certifier.** Phionyx publishes mappings; it does not issue compliance guarantees. A passing judgment is *passed structural rubric evaluation*, not *approved for production*.
+
+## Install
+
+```bash
+pip install phionyx-eval
+```
+
+Requires Python ≥3.10 and `phionyx-core >= 0.5.0`.
+
+## 60-second usage
+
+```python
+from phionyx_eval import (
+    EVIDENCE_COVERAGE_RUBRIC,
+    LLMAsJudge,
+    build_judgment_envelope,
+    GENESIS_HASH,
+    __version__,
+)
+
+class MyClient:
+    """Your existing LLM client — anything with .complete(prompt) -> str."""
+    def complete(self, prompt: str) -> str:
+        return your_llm.invoke(prompt)  # replace with your call
+
+judge = LLMAsJudge(MyClient())
+verdict = judge.judge(
+    claim="Fixed the off-by-one in paginate() for the empty-input case",
+    evidence="pytest tests/unit/test_paginate.py -k off_by_one — 1/1 pass",
+    rubric=EVIDENCE_COVERAGE_RUBRIC,
+)
+print(verdict.verdict, verdict.aggregate_score)
+
+# Wrap the judgment in a signed envelope for the audit chain:
+envelope = build_judgment_envelope(
+    judgment=verdict,
+    package_version=__version__,
+    previous_hash=GENESIS_HASH,  # or the previous envelope's integrity.current
+    turn_index=0,
+)
+```
+
+## Standard rubrics
+
+| Rubric | Pass threshold | Criteria |
+|---|---|---|
+| `EVIDENCE_COVERAGE_RUBRIC` | 0.7 | `evidence_addresses_claim_scope`, `evidence_exercises_claimed_paths`, `evidence_independent_of_claim_text` |
+| `CORRECTNESS_RUBRIC` | 0.7 | `claim_consistent_with_evidence`, `no_internal_contradictions`, `scope_appropriately_qualified` |
+| `COMPLETENESS_RUBRIC` | 0.6 | `claim_addresses_full_user_scope`, `omissions_explicitly_acknowledged`, `edge_cases_considered` |
+| `INDEPENDENT_VERIFIABILITY_RUBRIC` | 0.7 | `evidence_contains_reproduction_steps`, `evidence_names_specific_paths_or_commands`, `evidence_independent_of_agent_narration` |
+
+All four use a 0–5 integer scale per criterion. Caller-authored rubrics work the same way; pass a `Rubric` instance to `judge.judge(...)`.
+
+## Verdict derivation
+
+Verdicts are deterministic, not LLM-emitted:
+
+1. Average the per-criterion integer scores.
+2. Normalise into [0, 1] against `(scale_max - scale_min)`.
+3. If `aggregate >= pass_threshold` → `pass`.
+4. Else if `aggregate >= pass_threshold - 0.05` → `uncertain` (near-miss band).
+5. Else → `fail`.
+
+The LLM does not vote on its own pass/fail.
+
+## Composing with the Phionyx audit chain
+
+The `JudgmentEnvelope` follows the same hash-chained pattern Phionyx uses for `AgentMessageEnvelope` and the `subagent_chain` block. A producer accumulating many judgments builds a single linear chain by passing the prior envelope's `integrity.current` as the next call's `previous_hash`. Tampering any envelope's payload (claim text, rubric name, score, rationale) breaks `envelope_hash` recomputation.
+
+## Cross-runtime importers (F13 v0.6.0 W3)
+
+Import Langfuse traces and LangSmith runs into Phionyx envelope chains. Round-trip lossless for the mappable fields named below; non-mappable foreign fields are preserved verbatim under `subject.metadata.imported_extras` so a future Phionyx-side exporter could reconstruct the foreign shape.
+
+### Langfuse
+
+```python
+from phionyx_eval import import_langfuse_trace
+
+result = import_langfuse_trace(langfuse_trace_dict)
+# result.envelopes[0]   → trace_root envelope
+# result.envelopes[1:]  → one envelope per observation, in original order
+# result.mapping_report → MappingReport (mapped_fields, preserved_extras, dropped_fields)
+```
+
+Mappable Langfuse fields:
+
+| Foreign | Phionyx |
+|---|---|
+| `id` | `subject.foreign_trace_id` |
+| `name`, `userId`, `sessionId`, `release`, `version`, `input`, `output`, `metadata`, `tags`, `public`, `createdAt`, `updatedAt` | `record.<snake_case>` |
+| Observation `id` | `record.observation_id` |
+| Observation `type` | `subject.event_type` |
+| Observation `name`, `startTime`, `endTime`, `input`, `output`, `level`, `statusMessage`, `model`, `modelParameters`, `usage`, `parentObservationId` | `record.<snake_case>` |
+
+Schema: `phionyx.imported_langfuse_envelope.v1`.
+
+### LangSmith
+
+```python
+from phionyx_eval import import_langsmith_run
+
+result = import_langsmith_run(
+    root_run_dict,
+    descendants=descendant_run_dicts,  # optional; resolved via child_run_ids
+)
+# result.envelopes is in depth-first pre-order traversal of the run tree.
+```
+
+Mappable LangSmith fields per run:
+
+| Foreign | Phionyx |
+|---|---|
+| `id` | `subject.foreign_trace_id` |
+| `run_type` | `subject.event_type` |
+| `name`, `inputs`, `outputs`, `start_time`, `end_time`, `error`, `extra`, `parent_run_id`, `child_run_ids`, `events`, `feedback` | `record.<snake_case>` |
+
+Schema: `phionyx.imported_langsmith_envelope.v1`. Tree shape preserved in `record.parent_run_id` / `record.child_run_ids` so a downstream consumer can reconstruct the tree.
+
+### Composition with the judge
+
+The output of either importer is a list of Phionyx envelopes. The LLMAsJudge can then run over any envelope's `record` payload to score a specific claim (e.g. *the drafting step's output addresses the input*) under an evidence-coverage rubric — turning a third-party trace into a Phionyx-evaluable evidence record without re-running the original system.
+
+## Composing with the Phionyx Evaluation Standard
+
+The four standard rubrics implement Phionyx's cross-domain evidence baseline. They are not the same as the `assessment_signal` taxonomy in the [Phionyx Evaluation Standard v0.2.0](https://github.com/halvrenofviryel/phionyx-evaluation-standard) — the standard names *which signal* a coverage claim is interpreted against; this package names *how* the judge grades evidence quality on the runtime-evidence dimension. The two compose: a Compliance-Mapping row whose `assessment_signal` is `governance_envelope.integrity.canonical_json_hash_chain` can use the `EVIDENCE_COVERAGE_RUBRIC` to grade whether a specific claim is supported by that signal.
+
+## License
+
+AGPL-3.0-or-later, consistent with the rest of the Phionyx open-source distribution.
+
+## Links
+
+- [Phionyx Research](https://phionyx.ai)
+- [Phionyx Evaluation Standard](https://github.com/halvrenofviryel/phionyx-evaluation-standard)
+- [phionyx-core on PyPI](https://pypi.org/project/phionyx-core/)

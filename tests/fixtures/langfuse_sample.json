@@ -1,0 +1,55 @@
+{
+  "id": "trace_lf_e6a575f0a1b2c3d4",
+  "name": "Phionyx Eval Quickstart",
+  "userId": "user_42",
+  "sessionId": "session_abc",
+  "release": "0.1.0a1",
+  "version": "0.1.0",
+  "input": "What evidence formats does Phionyx Evaluation Standard v0.2.0 require?",
+  "output": "Three evidence rows prepared by research-agent.",
+  "metadata": {"workflow": "research_then_draft"},
+  "tags": ["phionyx", "eval", "demo"],
+  "public": false,
+  "createdAt": "2026-05-25T11:00:00Z",
+  "updatedAt": "2026-05-25T11:01:30Z",
+  "projectId_langfuse_specific": "proj_xyz",
+  "bookmarked_langfuse_specific": true,
+  "observations": [
+    {
+      "id": "obs_001",
+      "type": "generation",
+      "name": "research_query",
+      "startTime": "2026-05-25T11:00:00Z",
+      "endTime": "2026-05-25T11:00:15Z",
+      "input": [{"role": "user", "content": "Summarise Eval Standard v0.2.0"}],
+      "output": "Compliance-Mapping rows; assessment_signal field; coverage_scope...",
+      "level": "DEFAULT",
+      "model": "claude-3-5-sonnet-20241022",
+      "modelParameters": {"temperature": 0.0},
+      "usage": {"input": 250, "output": 320, "total": 570, "unit": "TOKENS"},
+      "parentObservationId": null,
+      "promptId_langfuse_specific": "prompt_lf_abc"
+    },
+    {
+      "id": "obs_002",
+      "type": "span",
+      "name": "drafting_phase",
+      "startTime": "2026-05-25T11:00:15Z",
+      "endTime": "2026-05-25T11:01:00Z",
+      "input": "Summary from research_query",
+      "output": "Drafted three evidence rows for the standard.",
+      "level": "DEFAULT",
+      "statusMessage": "OK",
+      "parentObservationId": "obs_001"
+    },
+    {
+      "id": "obs_003",
+      "type": "event",
+      "name": "completion_signal",
+      "startTime": "2026-05-25T11:01:00Z",
+      "endTime": "2026-05-25T11:01:00Z",
+      "level": "DEFAULT",
+      "parentObservationId": "obs_002"
+    }
+  ]
+}

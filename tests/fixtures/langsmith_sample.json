@@ -1,0 +1,52 @@
+{
+  "root": {
+    "id": "ls_run_root_a1b2c3d4",
+    "name": "Phionyx Eval Quickstart Chain",
+    "run_type": "chain",
+    "inputs": {"question": "What evidence formats does Phionyx Evaluation Standard v0.2.0 require?"},
+    "outputs": {"answer": "Three evidence rows prepared by research-agent."},
+    "start_time": "2026-05-25T11:00:00Z",
+    "end_time": "2026-05-25T11:01:30Z",
+    "error": null,
+    "extra": {"trace_origin": "langsmith_sdk_v0.0.0"},
+    "parent_run_id": null,
+    "child_run_ids": ["ls_run_child_001", "ls_run_child_002"],
+    "events": [],
+    "feedback": [],
+    "session_id_langsmith_specific": "ls_session_xyz",
+    "manifest_langsmith_specific": {"foo": "bar"}
+  },
+  "descendants": [
+    {
+      "id": "ls_run_child_001",
+      "name": "research_llm",
+      "run_type": "llm",
+      "inputs": {"prompt": "Summarise Eval Standard v0.2.0"},
+      "outputs": {"completion": "Compliance-Mapping rows; assessment_signal field..."},
+      "start_time": "2026-05-25T11:00:00Z",
+      "end_time": "2026-05-25T11:00:15Z",
+      "error": null,
+      "extra": {"model": "claude-3-5-sonnet-20241022", "temperature": 0.0},
+      "parent_run_id": "ls_run_root_a1b2c3d4",
+      "child_run_ids": [],
+      "events": [],
+      "feedback": [],
+      "private_token_count_langsmith_specific": {"prompt": 250, "completion": 320}
+    },
+    {
+      "id": "ls_run_child_002",
+      "name": "drafting_tool",
+      "run_type": "tool",
+      "inputs": {"summary": "..."},
+      "outputs": {"draft": "Three evidence rows..."},
+      "start_time": "2026-05-25T11:00:15Z",
+      "end_time": "2026-05-25T11:01:00Z",
+      "error": null,
+      "extra": null,
+      "parent_run_id": "ls_run_root_a1b2c3d4",
+      "child_run_ids": [],
+      "events": [{"name": "validation_passed", "time": "2026-05-25T11:00:50Z"}],
+      "feedback": [{"score": 0.9, "key": "correctness"}]
+    }
+  ]
+}
