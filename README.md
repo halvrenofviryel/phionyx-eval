@@ -10,7 +10,7 @@
 
 | Component | Repo / package | Role | Version |
 |---|---|---|---|
-| **Engine** | `phionyx-core` | Deterministic-cognition runtime (46-block pipeline, audit chain) | v0.7.2 |
+| **Engine** | `phionyx-core` | Deterministic runtime (46-block pipeline, audit chain) | v0.7.2 |
 | **Gate** | `phionyx-pipeline-mcp` | Self-governance MCP gate; the Claim-Governance (CG-L0…CG-L5) ladder rates **this** | v0.2.0 stable / v0.3.0a1 alpha |
 | **Standard** | `phionyx-evaluation-standard` | Vendor-neutral spec: L0-L3, D0-D3, CG-L0…CG-L5 scales | v0.1.1 / v0.2.0 |
 | **This package** | `phionyx-eval` (adapter) | Eval-side LLM-as-judge for claim/evidence pairs | **v0.1.0a1** |
@@ -28,7 +28,7 @@ A small eval-side toolkit:
 
 ## What this package is NOT
 
-- **NOT a runtime cognitive component.** LLM-as-judge is a measurement tool. It does not enter the Phionyx mind-loop, does not update memory, does not affect determinism in `phionyx-core`. Per the AGI invariants, this is infrastructure, not cognitive progress.
+- **NOT a runtime reasoning component.** LLM-as-judge is a measurement tool. It does not enter the Phionyx mind-loop, does not update memory, does not affect determinism in `phionyx-core`. Per the AGI invariants, this is infrastructure, not a capability advance.
 - **NOT a benchmark runner.** It scores one (claim, evidence) pair at a time. Batch evaluation, score aggregation across many calls, and dashboarding are out of scope for v0.1.
 - **NOT a compliance certifier.** Phionyx publishes mappings; it does not issue compliance guarantees. A passing judgment is *passed structural rubric evaluation*, not *approved for production*.
 
