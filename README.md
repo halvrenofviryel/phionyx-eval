@@ -4,7 +4,18 @@
 
 ## Status
 
-**v0.1.0a1 — alpha.** Phionyx v0.6.0 W2 deliverable. Ships in the Viryel monorepo at `tools/phionyx_eval/`; promoted to the public `halvrenofviryel/phionyx-eval` repo at v0.6.0 release.
+**v0.1.0a1 — alpha.** This is an **eval-side adapter** in the Phionyx portfolio (it carries its own version line, independent of the engine, gate, and Standard). It is published to the public [`halvrenofviryel/phionyx-eval`](https://github.com/halvrenofviryel/phionyx-eval) repo.
+
+### Where this sits in the Phionyx stack
+
+| Component | Repo / package | Role | Version |
+|---|---|---|---|
+| **Engine** | `phionyx-core` | Deterministic-cognition runtime (46-block pipeline, audit chain) | v0.7.2 |
+| **Gate** | `phionyx-pipeline-mcp` | Self-governance MCP gate; the Claim-Governance (CG-L0…CG-L5) ladder rates **this** | v0.2.0 stable / v0.3.0a1 alpha |
+| **Standard** | `phionyx-evaluation-standard` | Vendor-neutral spec: L0-L3, D0-D3, CG-L0…CG-L5 scales | v0.1.1 / v0.2.0 |
+| **This package** | `phionyx-eval` (adapter) | Eval-side LLM-as-judge for claim/evidence pairs | **v0.1.0a1** |
+
+`phionyx-eval` is an adapter, not the engine, gate, or Standard. It produces a `JudgmentEnvelope`; the Claim-Governance ladder rates the **gate** (`phionyx-pipeline-mcp`), not this package and not the engine.
 
 ## What this package is
 
@@ -27,7 +38,7 @@ A small eval-side toolkit:
 pip install phionyx-eval
 ```
 
-Requires Python ≥3.10 and `phionyx-core >= 0.5.0`.
+Requires Python ≥3.10 and `phionyx-core`. The package declares a `phionyx-core >= 0.5.0` floor; it is tested against the current `phionyx-core` v0.7.x line.
 
 ## 60-second usage
 
@@ -89,7 +100,7 @@ The LLM does not vote on its own pass/fail.
 
 The `JudgmentEnvelope` follows the same hash-chained pattern Phionyx uses for `AgentMessageEnvelope` and the `subagent_chain` block. A producer accumulating many judgments builds a single linear chain by passing the prior envelope's `integrity.current` as the next call's `previous_hash`. Tampering any envelope's payload (claim text, rubric name, score, rationale) breaks `envelope_hash` recomputation.
 
-## Cross-runtime importers (F13 v0.6.0 W3)
+## Cross-runtime importers
 
 Import Langfuse traces and LangSmith runs into Phionyx envelope chains. Round-trip lossless for the mappable fields named below; non-mappable foreign fields are preserved verbatim under `subject.metadata.imported_extras` so a future Phionyx-side exporter could reconstruct the foreign shape.
 
@@ -145,6 +156,8 @@ The output of either importer is a list of Phionyx envelopes. The LLMAsJudge can
 ## Composing with the Phionyx Evaluation Standard
 
 The four standard rubrics implement Phionyx's cross-domain evidence baseline. They are not the same as the `assessment_signal` taxonomy in the [Phionyx Evaluation Standard v0.2.0](https://github.com/halvrenofviryel/phionyx-evaluation-standard) — the standard names *which signal* a coverage claim is interpreted against; this package names *how* the judge grades evidence quality on the runtime-evidence dimension. The two compose: a Compliance-Mapping row whose `assessment_signal` is `governance_envelope.integrity.canonical_json_hash_chain` can use the `EVIDENCE_COVERAGE_RUBRIC` to grade whether a specific claim is supported by that signal.
+
+The Evaluation Standard defines the L0-L3 (evaluation maturity) and D0-D3 (determinism) scales, both released in v0.1.1 / v0.2.0, plus the CG-L0…CG-L5 (claim-governance) ladder, which is the Standard's v0.3-draft layer. The CG ladder rates the self-governance **gate** (`phionyx-pipeline-mcp`) — not this eval-side adapter.
 
 ## License
 
