@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "phionyx-eval"
 version = "0.1.0a1"
-description = "Phionyx evaluation tooling — LLM-as-judge primitive (eval-side) plus the assessment-signal vocabulary from the Phionyx Evaluation Standard v0.2.0. Producers run a judge against a (claim, evidence, rubric) triple and emit a signed Judgment envelope. Caller supplies the LLM client; no hard dependency on any provider SDK."
+description = "Phionyx evaluation tooling — an LLM-as-judge primitive (eval-side) that composes with AIREP (the AI Runtime Evidence Protocol) decision records. Producers run a judge against a (claim, evidence, rubric) triple and emit a signed Judgment envelope. Caller supplies the LLM client; no hard dependency on any provider SDK."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "AGPL-3.0-or-later"}
@@ -17,7 +17,7 @@ keywords = [
     "audit-chain",
     "agentic-ai",
     "phionyx",
-    "evaluation-standard",
+    "airep",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -45,7 +45,7 @@ test = [
 [project.urls]
 Homepage = "https://phionyx.ai"
 Repository = "https://github.com/halvrenofviryel/phionyx-eval"
-"Evaluation Standard" = "https://github.com/halvrenofviryel/phionyx-evaluation-standard"
+"AIREP" = "https://github.com/halvrenofviryel/ai-runtime-evidence-protocol"
 
 [tool.setuptools.packages.find]
 where = ["src"]

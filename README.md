@@ -4,18 +4,17 @@
 
 ## Status
 
-**v0.1.0a1 — alpha.** This is an **eval-side adapter** in the Phionyx portfolio (it carries its own version line, independent of the engine, gate, and Standard). It is published to the public [`halvrenofviryel/phionyx-eval`](https://github.com/halvrenofviryel/phionyx-eval) repo.
+**v0.1.0a1 — alpha.** This is an **eval-side adapter** in the Phionyx portfolio (it carries its own version line, independent of the engine and the evidence format it composes with). It is published to the public [`halvrenofviryel/phionyx-eval`](https://github.com/halvrenofviryel/phionyx-eval) repo.
 
 ### Where this sits in the Phionyx stack
 
 | Component | Repo / package | Role | Version |
 |---|---|---|---|
-| **Engine** | `phionyx-core` | Deterministic runtime (46-block pipeline, audit chain) | v0.7.2 |
-| **Gate** | `phionyx-pipeline-mcp` | Self-governance MCP gate; the Claim-Governance (CG-L0…CG-L5) ladder rates **this** | v0.2.0 stable / v0.3.0a1 alpha |
-| **Standard** | `phionyx-evaluation-standard` | Vendor-neutral spec: L0-L3, D0-D3, CG-L0…CG-L5 scales | v0.1.1 / v0.2.0 |
+| **Engine** | `phionyx-core` | Deterministic runtime (46-block pipeline, audit chain) | v0.8.1 |
+| **Evidence format** | `ai-runtime-evidence-protocol` | AI Runtime Evidence Protocol (AIREP) — a vendor-neutral, experimental open format for a per-decision AI decision receipt | v0.1 (experimental) |
 | **This package** | `phionyx-eval` (adapter) | Eval-side LLM-as-judge for claim/evidence pairs | **v0.1.0a1** |
 
-`phionyx-eval` is an adapter, not the engine, gate, or Standard. It produces a `JudgmentEnvelope`; the Claim-Governance ladder rates the **gate** (`phionyx-pipeline-mcp`), not this package and not the engine.
+`phionyx-eval` is an adapter, not the engine or the evidence format. It produces a `JudgmentEnvelope` — a signed, hash-chained record of one judgment — which sits alongside the AIREP decision records emitted by the Phionyx runtime.
 
 ## What this package is
 
@@ -38,7 +37,7 @@ A small eval-side toolkit:
 pip install phionyx-eval
 ```
 
-Requires Python ≥3.10 and `phionyx-core`. The package declares a `phionyx-core >= 0.5.0` floor; it is tested against the current `phionyx-core` v0.7.x line.
+Requires Python ≥3.10 and `phionyx-core`. The package declares a `phionyx-core >= 0.5.0` floor; it is tested against the current `phionyx-core` v0.8.x line.
 
 ## 60-second usage
 
@@ -153,11 +152,13 @@ Schema: `phionyx.imported_langsmith_envelope.v1`. Tree shape preserved in `recor
 
 The output of either importer is a list of Phionyx envelopes. The LLMAsJudge can then run over any envelope's `record` payload to score a specific claim (e.g. *the drafting step's output addresses the input*) under an evidence-coverage rubric — turning a third-party trace into a Phionyx-evaluable evidence record without re-running the original system.
 
-## Composing with the Phionyx Evaluation Standard
+## Composing with AIREP decision records
 
-The four standard rubrics implement Phionyx's cross-domain evidence baseline. They are not the same as the `assessment_signal` taxonomy in the [Phionyx Evaluation Standard v0.2.0](https://github.com/halvrenofviryel/phionyx-evaluation-standard) — the standard names *which signal* a coverage claim is interpreted against; this package names *how* the judge grades evidence quality on the runtime-evidence dimension. The two compose: a Compliance-Mapping row whose `assessment_signal` is `governance_envelope.integrity.canonical_json_hash_chain` can use the `EVIDENCE_COVERAGE_RUBRIC` to grade whether a specific claim is supported by that signal.
+The four built-in rubrics implement Phionyx's cross-domain evidence baseline. They compose cleanly with the [AI Runtime Evidence Protocol (AIREP)](https://github.com/halvrenofviryel/ai-runtime-evidence-protocol) — an experimental, vendor-neutral open format for a per-decision **AI decision receipt**: one signed, hash-chained, offline-checkable record per AI runtime decision, readable by anyone and tied to no vendor.
 
-The Evaluation Standard defines the L0-L3 (evaluation maturity) and D0-D3 (determinism) scales, both released in v0.1.1 / v0.2.0, plus the CG-L0…CG-L5 (claim-governance) ladder, which is the Standard's v0.3-draft layer. The CG ladder rates the self-governance **gate** (`phionyx-pipeline-mcp`) — not this eval-side adapter.
+An AIREP record names *what happened* in a decision — its `claim`, the `evidence` cited, the `output`, and the `integrity` hash chain that ties them together. This package names *how* a judge grades the evidence quality behind one of those claims. The two compose: a judge can run `EVIDENCE_COVERAGE_RUBRIC` over the `claim`/`evidence` pair carried in an AIREP record to grade whether the claim is actually supported by the evidence cited.
+
+The Phionyx **Reasoned Governance Envelope (RGE)** is AIREP's reference producer — the first system that emits AIREP records, maturing by conforming to the format. AIREP is an experimental, proposed open format with one reference implementation; it is not a ratified standard.
 
 ## License
 
@@ -166,5 +167,5 @@ AGPL-3.0-or-later, consistent with the rest of the Phionyx open-source distribut
 ## Links
 
 - [Phionyx Research](https://phionyx.ai)
-- [Phionyx Evaluation Standard](https://github.com/halvrenofviryel/phionyx-evaluation-standard)
+- [AI Runtime Evidence Protocol (AIREP)](https://github.com/halvrenofviryel/ai-runtime-evidence-protocol)
 - [phionyx-core on PyPI](https://pypi.org/project/phionyx-core/)
