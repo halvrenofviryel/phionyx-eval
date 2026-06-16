@@ -27,7 +27,7 @@ A small eval-side toolkit:
 
 ## What this package is NOT
 
-- **NOT a runtime reasoning component.** LLM-as-judge is a measurement tool. It does not enter the Phionyx mind-loop, does not update memory, does not affect determinism in `phionyx-core`. Per the AGI invariants, this is infrastructure, not a capability advance.
+- **NOT a runtime reasoning component.** LLM-as-judge is a measurement tool. It does not update memory or affect determinism in `phionyx-core` — measurement only, not a runtime reasoning component and not a capability advance.
 - **NOT a benchmark runner.** It scores one (claim, evidence) pair at a time. Batch evaluation, score aggregation across many calls, and dashboarding are out of scope for v0.1.
 - **NOT a compliance certifier.** Phionyx publishes mappings; it does not issue compliance guarantees. A passing judgment is *passed structural rubric evaluation*, not *approved for production*.
 
