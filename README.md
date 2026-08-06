@@ -10,7 +10,7 @@
 
 | Component | Repo / package | Role | Version |
 |---|---|---|---|
-| **Engine** | `phionyx-core` | Deterministic runtime (46-block pipeline, audit chain) | v0.8.1 |
+| **Engine** | `phionyx-core` | Deterministic runtime (46-block pipeline, audit chain) | v0.9.0 |
 | **Evidence format** | `ai-runtime-evidence-protocol` | AI Runtime Evidence Protocol (AIREP) — a vendor-neutral, experimental open format for a per-decision AI decision receipt | v0.1 (experimental) |
 | **This package** | `phionyx-eval` (adapter) | Eval-side LLM-as-judge for claim/evidence pairs | **v0.1.0a1** |
 
@@ -158,7 +158,7 @@ The four built-in rubrics implement Phionyx's cross-domain evidence baseline. Th
 
 An AIREP record names *what happened* in a decision — its `claim`, the `evidence` cited, the `output`, and the `integrity` hash chain that ties them together. This package names *how* a judge grades the evidence quality behind one of those claims. The two compose: a judge can run `EVIDENCE_COVERAGE_RUBRIC` over the `claim`/`evidence` pair carried in an AIREP record to grade whether the claim is actually supported by the evidence cited.
 
-The Phionyx **Reasoned Governance Envelope (RGE)** is AIREP's reference producer — the first system that emits AIREP records, maturing by conforming to the format. AIREP is an experimental, proposed open format with one reference implementation; it is not a ratified standard.
+The Phionyx **Reasoned Governance Envelope (RGE)** is developed alongside AIREP — a conformant projection between the two is **not implemented** (measured 2026-08-06: AIREP's own reference verifier rejects an RGE envelope handed to it directly) — maturing by conforming to the format. AIREP is an experimental, proposed open format with one reference implementation; it is not a ratified standard.
 
 ## License
 
