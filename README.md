@@ -158,7 +158,7 @@ The four built-in rubrics implement Phionyx's cross-domain evidence baseline. Th
 
 An AIREP record names *what happened* in a decision — its `claim`, the `evidence` cited, the `output`, and the `integrity` hash chain that ties them together. This package names *how* a judge grades the evidence quality behind one of those claims. The two compose: a judge can run `EVIDENCE_COVERAGE_RUBRIC` over the `claim`/`evidence` pair carried in an AIREP record to grade whether the claim is actually supported by the evidence cited.
 
-The Phionyx **Reasoned Governance Envelope (RGE)** is developed alongside AIREP — a conformant projection between the two is **not implemented** (measured 2026-08-06: AIREP's own reference verifier rejects an RGE envelope handed to it directly) — maturing by conforming to the format. AIREP is an experimental, proposed open format with one reference implementation; it is not a ratified standard.
+The Phionyx **Reasoned Governance Envelope (RGE)** is developed alongside AIREP — a conformant projection between the two is **not implemented** (measured 2026-08-06: AIREP's own reference verifier rejects an RGE envelope handed to it directly) — maturing by conforming to the format. AIREP is an experimental, proposed open format with no conformant producer yet; it is not a ratified standard.
 
 ## License
 
