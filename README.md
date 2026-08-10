@@ -12,7 +12,7 @@
 |---|---|---|---|
 | **Engine** | `phionyx-core` | Deterministic runtime (46-block pipeline, audit chain) | v0.9.0 |
 | **Evidence format** | `ai-runtime-evidence-protocol` | AI Runtime Evidence Protocol (AIREP) — a vendor-neutral, experimental open format for a per-decision AI decision receipt | v0.1 (experimental) |
-| **This package** | `phionyx-eval` (adapter) | Eval-side LLM-as-judge for claim/evidence pairs | **v0.1.0a1** |
+| **This package** | `phionyx-eval` (adapter) | Eval-side LLM-as-judge for claim/evidence pairs | **v0.1.0a2** |
 
 `phionyx-eval` is an adapter, not the engine or the evidence format. It produces a `JudgmentEnvelope` — a signed, hash-chained record of one judgment — which sits alongside the AIREP decision records emitted by the Phionyx runtime.
 

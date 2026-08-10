@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phionyx-eval"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Phionyx evaluation tooling — an LLM-as-judge primitive (eval-side) that composes with AIREP (the AI Runtime Evidence Protocol) decision records. Producers run a judge against a (claim, evidence, rubric) triple and emit a signed Judgment envelope. Caller supplies the LLM client; no hard dependency on any provider SDK."
 readme = "README.md"
 requires-python = ">=3.10"
