@@ -4,13 +4,13 @@
 
 ## Status
 
-**v0.1.0a1 — alpha.** This is an **eval-side adapter** in the Phionyx portfolio (it carries its own version line, independent of the engine and the evidence format it composes with). It is published to the public [`halvrenofviryel/phionyx-eval`](https://github.com/halvrenofviryel/phionyx-eval) repo.
+**v0.1.0a2 — alpha.** This is an **eval-side adapter** in the Phionyx portfolio (it carries its own version line, independent of the engine and the evidence format it composes with). It is published to the public [`halvrenofviryel/phionyx-eval`](https://github.com/halvrenofviryel/phionyx-eval) repo.
 
 ### Where this sits in the Phionyx stack
 
 | Component | Repo / package | Role | Version |
 |---|---|---|---|
-| **Engine** | `phionyx-core` | Deterministic runtime (46-block pipeline, audit chain) | v0.9.0 |
+| **Engine** | `phionyx-core` | Deterministic runtime (46-block pipeline, audit chain) | v0.9.1 |
 | **Evidence format** | `ai-runtime-evidence-protocol` | AI Runtime Evidence Protocol (AIREP) — a vendor-neutral, experimental open format for a per-decision AI decision receipt | v0.1 (experimental) |
 | **This package** | `phionyx-eval` (adapter) | Eval-side LLM-as-judge for claim/evidence pairs | **v0.1.0a2** |
 
