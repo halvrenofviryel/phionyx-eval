@@ -1,6 +1,6 @@
 # phionyx-eval
 
-> LLM-as-judge primitive (eval-side) for Phionyx runtime-evidence chains. Score a (claim, evidence) pair under a rubric; produce a signed Judgment envelope; verify the chain end-to-end. The caller supplies the LLM client — there is no hard dependency on any provider SDK.
+> LLM-as-judge primitive (eval-side) for Phionyx runtime-evidence chains. Score a (claim, evidence) pair under a rubric; produce a hash-chained Judgment envelope (optionally signed). The caller supplies the LLM client — there is no hard dependency on any provider SDK.
 
 ## Status
 
@@ -14,7 +14,7 @@
 | **Evidence format** | `ai-runtime-evidence-protocol` | AI Runtime Evidence Protocol (AIREP) — a vendor-neutral, experimental open format for a per-decision AI decision receipt | v0.1 (experimental) |
 | **This package** | `phionyx-eval` (adapter) | Eval-side LLM-as-judge for claim/evidence pairs | **v0.1.0a2** |
 
-`phionyx-eval` is an adapter, not the engine or the evidence format. It produces a `JudgmentEnvelope` — a signed, hash-chained record of one judgment — which sits alongside the AIREP decision records emitted by the Phionyx runtime.
+`phionyx-eval` is an adapter, not the engine or the evidence format. It produces a `JudgmentEnvelope` — a hash-chained record of one judgment (optionally signed) — which sits alongside the RGE runtime-evidence records emitted by the Phionyx runtime (no AIREP-conformance claim).
 
 ## What this package is
 
@@ -23,7 +23,7 @@ A small eval-side toolkit:
 - **`LLMClient`** — Protocol surface (`complete(prompt: str) -> str`). Plug in Anthropic SDK, OpenAI SDK, LiteLLM, an HTTP wrapper, or a mock.
 - **`Rubric`** — Pydantic model for a scoring rubric: criteria, integer scale, normalised pass threshold. Four canonical Phionyx rubrics ship by default.
 - **`LLMAsJudge`** — judges one (claim, evidence) pair under a rubric. Produces a `Judgment` with per-criterion scores, an aggregate normalised score, a deterministic verdict (pass / fail / uncertain), and the model's overall rationale.
-- **`build_judgment_envelope`** — wraps a `Judgment` in a signed, hash-chained envelope. Mirrors the audit-chain pattern used by `phionyx-langchain-langgraph` and `phionyx-mcp-server`.
+- **`build_judgment_envelope`** — wraps a `Judgment` in a hash-chained envelope (optionally signed; the default demo signer is public-keyed HMAC — replay-grade, not authenticity-grade). Mirrors the audit-chain pattern used by `phionyx-langchain-langgraph` and `phionyx-mcp-server`.
 
 ## What this package is NOT
 
@@ -63,7 +63,7 @@ verdict = judge.judge(
 )
 print(verdict.verdict, verdict.aggregate_score)
 
-# Wrap the judgment in a signed envelope for the audit chain:
+# Wrap the judgment in a hash-chained envelope for the audit chain:
 envelope = build_judgment_envelope(
     judgment=verdict,
     package_version=__version__,
@@ -85,7 +85,7 @@ All four use a 0–5 integer scale per criterion. Caller-authored rubrics work t
 
 ## Verdict derivation
 
-Verdicts are deterministic, not LLM-emitted:
+The final pass/fail derivation is deterministic given the parsed per-criterion scores (the scores themselves remain model-dependent):
 
 1. Average the per-criterion integer scores.
 2. Normalise into [0, 1] against `(scale_max - scale_min)`.
